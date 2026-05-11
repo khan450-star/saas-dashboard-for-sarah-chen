@@ -300,22 +300,41 @@ def list_runs(limit: int = 50, offset: int = 0) -> list[dict]:
 def get_stats() -> dict:
     """Aggregate stats across all runs."""
     conn = _connect()
-    row = conn.execute("""
-        SELECT
-            COUNT(*)                            AS total_runs,
-            SUM(CASE WHEN status='pass' THEN 1 ELSE 0 END) AS passed,
-            SUM(CASE WHEN status='fail' THEN 1 ELSE 0 END) AS failed,
-            SUM(CASE WHEN status='error' THEN 1 ELSE 0 END) AS errors,
-            ROUND(AVG(duration_secs), 1)        AS avg_duration_secs,
-            SUM(files_generated)                AS total_files_generated,
-            SUM(tests_run)                      AS total_tests_run,
-            SUM(tests_passed)                   AS total_tests_passed,
-            SUM(fix_attempts)                   AS total_fix_attempts,
-            ROUND(SUM(CASE WHEN status='pass' THEN budget_usd ELSE 0 END), 2) AS total_revenue,
-            ROUND(SUM(budget_usd), 2)           AS total_pipeline_value
-        FROM pipeline_runs
-        WHERE status != 'running'
-    """).fetchone()
+    if _is_postgres():
+        stats_sql = """
+            SELECT
+                COUNT(*)                            AS total_runs,
+                SUM(CASE WHEN status='pass' THEN 1 ELSE 0 END) AS passed,
+                SUM(CASE WHEN status='fail' THEN 1 ELSE 0 END) AS failed,
+                SUM(CASE WHEN status='error' THEN 1 ELSE 0 END) AS errors,
+                ROUND(CAST(AVG(duration_secs) AS NUMERIC), 1) AS avg_duration_secs,
+                SUM(files_generated)                AS total_files_generated,
+                SUM(tests_run)                      AS total_tests_run,
+                SUM(tests_passed)                   AS total_tests_passed,
+                SUM(fix_attempts)                   AS total_fix_attempts,
+                ROUND(CAST(SUM(CASE WHEN status='pass' THEN budget_usd ELSE 0 END) AS NUMERIC), 2) AS total_revenue,
+                ROUND(CAST(SUM(budget_usd) AS NUMERIC), 2) AS total_pipeline_value
+            FROM pipeline_runs
+            WHERE status != 'running'
+        """
+    else:
+        stats_sql = """
+            SELECT
+                COUNT(*)                            AS total_runs,
+                SUM(CASE WHEN status='pass' THEN 1 ELSE 0 END) AS passed,
+                SUM(CASE WHEN status='fail' THEN 1 ELSE 0 END) AS failed,
+                SUM(CASE WHEN status='error' THEN 1 ELSE 0 END) AS errors,
+                ROUND(AVG(duration_secs), 1)        AS avg_duration_secs,
+                SUM(files_generated)                AS total_files_generated,
+                SUM(tests_run)                      AS total_tests_run,
+                SUM(tests_passed)                   AS total_tests_passed,
+                SUM(fix_attempts)                   AS total_fix_attempts,
+                ROUND(SUM(CASE WHEN status='pass' THEN budget_usd ELSE 0 END), 2) AS total_revenue,
+                ROUND(SUM(budget_usd), 2)           AS total_pipeline_value
+            FROM pipeline_runs
+            WHERE status != 'running'
+        """
+    row = conn.execute(stats_sql).fetchone()
     conn.close()
     return dict(row) if row else {}
 
