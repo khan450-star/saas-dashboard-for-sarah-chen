@@ -76,7 +76,7 @@ _project_selection_mode_override: str | None = None
 
 def _send_notification_email(subject: str, body: str) -> None:
     """Fire an email notification from support@ to the owner. Non-blocking."""
-    if settings.email_mock:
+    if settings.email_mock or not (settings.resend_api_key or "").strip():
         print(f"  [MOCK NOTIFY] {subject}")
         return
     try:
@@ -116,6 +116,11 @@ def _get_llm(model_override: str | None = None):
         )
 
     model = model_override or f"anthropic/{settings.llm_model}"
+
+    # Claude Sonnet 4 (20250514) can fail with strict-tools requests in CrewAI.
+    # Use a safer default when that exact model is selected.
+    if model == "anthropic/claude-sonnet-4-20250514":
+        model = "anthropic/claude-3-5-sonnet-latest"
 
     if model.startswith("anthropic/"):
         return LLM(model=model, api_key=settings.anthropic_api_key)

@@ -51,6 +51,9 @@ class EmailTool(BaseTool):
         )
 
     def _live_send(self, to: str, subject: str, body: str, sender: str = "") -> str:
+        if not (settings.resend_api_key or "").strip():
+            return self._mock_send(to, subject, body, sender)
+
         resp = httpx.post(
             "https://api.resend.com/emails",
             headers={
