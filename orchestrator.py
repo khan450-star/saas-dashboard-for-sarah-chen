@@ -32,6 +32,31 @@ from crewai import LLM
 from config import settings
 import db
 
+# CrewAI can include strict tool-schema flags that some Anthropic models reject.
+# Strip those flags at runtime so tool-calling works with supported Claude models.
+try:
+    from crewai.llms.providers.anthropic.completion import AnthropicCompletion
+
+    _orig_convert_tools = AnthropicCompletion._convert_tools_for_interference
+
+    def _strip_strict_flags(obj):
+        if isinstance(obj, dict):
+            obj.pop("strict", None)
+            for v in obj.values():
+                _strip_strict_flags(v)
+        elif isinstance(obj, list):
+            for item in obj:
+                _strip_strict_flags(item)
+
+    def _patched_convert_tools_for_interference(self, tools):
+        converted = _orig_convert_tools(self, tools)
+        _strip_strict_flags(converted)
+        return converted
+
+    AnthropicCompletion._convert_tools_for_interference = _patched_convert_tools_for_interference
+except Exception:
+    pass
+
 # ── Agents ───────────────────────────────────────────────────────────
 from agents.scout import create_scout_agent
 from agents.analyst import create_analyst_agent
