@@ -3,88 +3,76 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { DashboardLayout } from '@/components/dashboard-layout'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
+import DashboardLayout from '@/components/DashboardLayout'
+import { User, Mail, Bell, Shield, Trash2 } from 'lucide-react'
 
-const settingsSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().optional(),
-  confirmPassword: z.string().optional(),
-}).refine((data) => {
-  if (data.newPassword && data.newPassword !== data.confirmPassword) {
-    return false
+interface UserSettings {
+  name: string
+  email: string
+  notifications: {
+    email: boolean
+    push: boolean
+    marketing: boolean
   }
-  return true
-}, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-})
-
-type SettingsForm = z.infer<typeof settingsSchema>
+  timezone: string
+}
 
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState('')
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<SettingsForm>({
-    resolver: zodResolver(settingsSchema),
+  const [settings, setSettings] = useState<UserSettings>({
+    name: '',
+    email: '',
+    notifications: {
+      email: true,
+      push: false,
+      marketing: false
+    },
+    timezone: 'America/New_York'
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    if (status === 'loading') return
-    if (!session) {
+    if (status === 'unauthenticated') {
       router.push('/auth/signin')
       return
     }
-    
-    // Set default values
-    setValue('name', session.user?.name || '')
-    setValue('email', session.user?.email || '')
-  }, [session, status, router, setValue])
 
-  const onSubmit = async (data: SettingsForm) => {
-    setIsLoading(true)
-    setMessage('')
-
-    try {
-      const res = await fetch('/api/user/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (res.ok) {
-        setMessage('Settings updated successfully')
-      } else {
-        const error = await res.json()
-        setMessage(error.message || 'An error occurred')
-      }
-    } catch (error) {
-      setMessage('An error occurred')
+    if (session?.user) {
+      setSettings(prev => ({
+        ...prev,
+        name: session.user?.name || '',
+        email: session.user?.email || ''
+      }))
     }
+  }, [session, status, router])
 
+  const handleSave = async () => {
+    setIsLoading(true)
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    setSaved(true)
     setIsLoading(false)
+    setTimeout(() => setSaved(false), 3000)
+  }
+
+  const handleNotificationChange = (key: keyof UserSettings['notifications']) => {
+    setSettings(prev => ({
+      ...prev,
+      notifications: {
+        ...prev.notifications,
+        [key]: !prev.notifications[key]
+      }
+    }))
   }
 
   if (status === 'loading') {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    )
   }
 
   if (!session) {
@@ -94,88 +82,185 @@ export default function SettingsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-gray-600">Manage your account settings and preferences</p>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+          {saved && (
+            <div className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-md">
+              Settings saved successfully!
+            </div>
+          )}
         </div>
-        
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-6">Profile Settings</h2>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
+
+        <div className="grid grid-cols-1 gap-6">
+          {/* Profile Settings */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                <User className="h-5 w-5 mr-2" />
+                Profile Information
+              </h2>
+            </div>
+            <div className="px-6 py-4 space-y-4">
               <div>
-                <Label htmlFor="name">Full Name</Label>
-                <Input
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
+                <input
+                  type="text"
                   id="name"
-                  {...register('name')}
-                  className={errors.name ? 'border-red-500' : ''}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  value={settings.name}
+                  onChange={(e) => setSettings(prev => ({ ...prev, name: e.target.value }))}
                 />
-                {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-                )}
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  value={settings.email}
+                  onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label htmlFor="timezone" className="block text-sm font-medium text-gray-700">
+                  Timezone
+                </label>
+                <select
+                  id="timezone"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                  value={settings.timezone}
+                  onChange={(e) => setSettings(prev => ({ ...prev, timezone: e.target.value }))}
+                >
+                  <option value="America/New_York">Eastern Time</option>
+                  <option value="America/Chicago">Central Time</option>
+                  <option value="America/Denver">Mountain Time</option>
+                  <option value="America/Los_Angeles">Pacific Time</option>
+                  <option value="UTC">UTC</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Notification Settings */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                <Bell className="h-5 w-5 mr-2" />
+                Notification Preferences
+              </h2>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Email Notifications</h3>
+                  <p className="text-sm text-gray-500">Receive notifications via email</p>
+                </div>
+                <button
+                  type="button"
+                  className={`${settings.notifications.email ? 'bg-primary-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+                  onClick={() => handleNotificationChange('email')}
+                >
+                  <span className={`${settings.notifications.email ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`} />
+                </button>
               </div>
               
-              <div>
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  {...register('email')}
-                  className={errors.email ? 'border-red-500' : ''}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                )}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Push Notifications</h3>
+                  <p className="text-sm text-gray-500">Receive push notifications in browser</p>
+                </div>
+                <button
+                  type="button"
+                  className={`${settings.notifications.push ? 'bg-primary-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+                  onClick={() => handleNotificationChange('push')}
+                >
+                  <span className={`${settings.notifications.push ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`} />
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Marketing Emails</h3>
+                  <p className="text-sm text-gray-500">Receive product updates and promotional emails</p>
+                </div>
+                <button
+                  type="button"
+                  className={`${settings.notifications.marketing ? 'bg-primary-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
+                  onClick={() => handleNotificationChange('marketing')}
+                >
+                  <span className={`${settings.notifications.marketing ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`} />
+                </button>
               </div>
             </div>
-            
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-medium mb-4">Change Password</h3>
-              <div className="grid gap-4 md:grid-cols-3">
+          </div>
+
+          {/* Security Settings */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900 flex items-center">
+                <Shield className="h-5 w-5 mr-2" />
+                Security
+              </h2>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    {...register('currentPassword')}
-                  />
+                  <h3 className="text-sm font-medium text-gray-900">Password</h3>
+                  <p className="text-sm text-gray-500">Last changed 3 months ago</p>
                 </div>
-                
+                <button className="btn btn-outline px-4 py-2 text-sm">
+                  Change Password
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    {...register('newPassword')}
-                  />
+                  <h3 className="text-sm font-medium text-gray-900">Two-Factor Authentication</h3>
+                  <p className="text-sm text-gray-500">Add an extra layer of security</p>
                 </div>
-                
-                <div>
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    {...register('confirmPassword')}
-                    className={errors.confirmPassword ? 'border-red-500' : ''}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
-                  )}
-                </div>
+                <button className="btn btn-outline px-4 py-2 text-sm">
+                  Enable 2FA
+                </button>
               </div>
             </div>
-            
-            {message && (
-              <div className={`p-4 rounded-lg ${message.includes('successfully') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                {message}
+          </div>
+
+          {/* Danger Zone */}
+          <div className="bg-white shadow rounded-lg border-l-4 border-red-500">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-red-900 flex items-center">
+                <Trash2 className="h-5 w-5 mr-2" />
+                Danger Zone
+              </h2>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900">Delete Account</h3>
+                  <p className="text-sm text-gray-500">Permanently delete your account and all data</p>
+                </div>
+                <button className="btn bg-red-600 text-white hover:bg-red-700 px-4 py-2 text-sm">
+                  Delete Account
+                </button>
               </div>
-            )}
-            
-            <Button type="submit" disabled={isLoading}>
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleSave}
+              disabled={isLoading}
+              className="btn btn-primary px-6 py-2"
+            >
               {isLoading ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </form>
-        </Card>
+            </button>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   )

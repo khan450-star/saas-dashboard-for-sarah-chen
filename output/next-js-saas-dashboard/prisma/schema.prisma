@@ -7,22 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                String    @id @default(cuid())
-  name              String?
-  email             String    @unique
-  emailVerified     DateTime?
-  image             String?
-  password          String?
-  stripeCustomerId  String?   @unique
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  accounts      Account[]
-  sessions      Session[]
-  subscription  Subscription?
-}
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -50,6 +34,19 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  subscription  Subscription?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -59,15 +56,23 @@ model VerificationToken {
 }
 
 model Subscription {
-  id                   String    @id @default(cuid())
-  userId               String    @unique
-  stripeSubscriptionId String    @unique
-  status               String
-  priceId              String
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  stripeCustomerId String?  @unique
+  planId           String
+  status           String
+  currentPeriodEnd DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Plan {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String
+  price       Float
+  stripePriceId String @unique
+  features    String
+  popular     Boolean @default(false)
 }

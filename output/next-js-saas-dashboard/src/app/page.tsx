@@ -1,81 +1,157 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { ArrowRight, CheckCircle } from 'lucide-react'
+import { ArrowRight, Check, Star } from 'lucide-react'
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" href="/">
-          <span className="font-bold text-xl">SaaS Dashboard</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link href="/auth/signin">
-            <Button variant="outline">Sign In</Button>
-          </Link>
-          <Link href="/auth/signup">
-            <Button>Get Started</Button>
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">
+      {/* Header */}
+      <header className="container py-6">
+        <nav className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="h-8 w-8 rounded bg-primary-600"></div>
+            <span className="text-xl font-bold text-gray-900">SaaSDash</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link href="/auth/signin" className="text-gray-600 hover:text-gray-900">
+              Sign In
+            </Link>
+            <Link href="/auth/signin" className="btn btn-primary px-4 py-2">
+              Get Started
+            </Link>
+          </div>
         </nav>
       </header>
-      
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
-                  The Complete SaaS Dashboard
-                </h1>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                  Manage your business with our comprehensive dashboard. Track metrics, manage users, and grow your revenue.
-                </p>
-              </div>
-              <div className="space-x-4">
-                <Link href="/auth/signup">
-                  <Button size="lg">
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
+
+      {/* Hero Section */}
+      <section className="container py-20">
+        <div className="mx-auto max-w-4xl text-center">
+          <h1 className="text-5xl font-bold text-gray-900 sm:text-6xl">
+            Build Your SaaS
+            <span className="text-primary-600"> Dashboard</span>
+          </h1>
+          <p className="mt-6 text-xl text-gray-600">
+            The modern dashboard solution for growing SaaS businesses. 
+            Manage your users, track analytics, and scale with confidence.
+          </p>
+          <div className="mt-10 flex items-center justify-center gap-x-6">
+            <Link href="/auth/signin" className="btn btn-primary px-8 py-3 text-lg">
+              Start Free Trial
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+            <button className="text-lg font-semibold text-gray-900">
+              Watch Demo
+            </button>
+          </div>
+          <div className="mt-10 flex items-center justify-center space-x-6 text-sm text-gray-500">
+            <div className="flex items-center">
+              <Check className="h-4 w-4 text-green-500 mr-1" />
+              No credit card required
+            </div>
+            <div className="flex items-center">
+              <Check className="h-4 w-4 text-green-500 mr-1" />
+              14-day free trial
+            </div>
+            <div className="flex items-center">
+              <Check className="h-4 w-4 text-green-500 mr-1" />
+              Cancel anytime
             </div>
           </div>
-        </section>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="container py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            Everything you need to succeed
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">
+            Powerful features designed to help your SaaS business grow.
+          </p>
+        </div>
         
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
-          <div className="container px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <CheckCircle className="h-12 w-12 text-green-500" />
-                <h3 className="text-xl font-bold">Analytics Dashboard</h3>
-                <p className="text-gray-500">Track your key metrics and performance indicators in real-time.</p>
-              </div>
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <CheckCircle className="h-12 w-12 text-green-500" />
-                <h3 className="text-xl font-bold">User Management</h3>
-                <p className="text-gray-500">Manage your users, roles, and permissions with ease.</p>
-              </div>
-              <div className="flex flex-col items-center space-y-4 text-center">
-                <CheckCircle className="h-12 w-12 text-green-500" />
-                <h3 className="text-xl font-bold">Billing Integration</h3>
-                <p className="text-gray-500">Handle subscriptions and payments seamlessly with Stripe.</p>
-              </div>
+        <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              title: 'Analytics Dashboard',
+              description: 'Real-time insights into your business metrics and user behavior.',
+              icon: '📊'
+            },
+            {
+              title: 'User Management',
+              description: 'Manage users, subscriptions, and access controls with ease.',
+              icon: '👥'
+            },
+            {
+              title: 'Billing Integration',
+              description: 'Seamless Stripe integration for subscription management.',
+              icon: '💳'
+            },
+            {
+              title: 'Team Collaboration',
+              description: 'Work together with your team in one unified platform.',
+              icon: '🤝'
+            },
+            {
+              title: 'API Access',
+              description: 'Powerful APIs to integrate with your existing tools.',
+              icon: '🔌'
+            },
+            {
+              title: '24/7 Support',
+              description: 'Get help when you need it with our dedicated support team.',
+              icon: '🎯'
+            }
+          ].map((feature, index) => (
+            <div key={index} className="rounded-lg bg-white p-8 shadow-sm">
+              <div className="text-3xl mb-4">{feature.icon}</div>
+              <h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
+              <p className="mt-2 text-gray-600">{feature.description}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Social Proof */}
+      <section className="container py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="flex items-center justify-center space-x-1">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+            ))}
           </div>
-        </section>
-      </main>
-      
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500">© 2024 SaaS Dashboard. All rights reserved.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
-          </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
-          </Link>
-        </nav>
+          <blockquote className="mt-6 text-xl font-medium text-gray-900">
+            "This dashboard completely transformed how we manage our SaaS business. 
+            The analytics are incredible and the billing integration is seamless."
+          </blockquote>
+          <p className="mt-4 text-gray-600">
+            Sarah Johnson, CEO at TechStart
+          </p>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container py-20">
+        <div className="rounded-2xl bg-primary-600 px-8 py-16 text-center">
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">
+            Ready to get started?
+          </h2>
+          <p className="mt-4 text-xl text-primary-100">
+            Join thousands of businesses already using our platform.
+          </p>
+          <div className="mt-8">
+            <Link href="/auth/signin" className="btn bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold">
+              Start Your Free Trial
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="container py-12">
+        <div className="border-t border-gray-200 pt-8 text-center text-gray-500">
+          <p>&copy; 2024 SaaSDash. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   )
