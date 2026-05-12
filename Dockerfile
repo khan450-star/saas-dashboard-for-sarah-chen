@@ -11,4 +11,4 @@ RUN python -m pip install --upgrade pip && \
 
 COPY . /app
 
-CMD ["sh", "-c", "python -m uvicorn orchestrator:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["python", "-c", "import os, uvicorn; uvicorn.run('orchestrator:app', host='0.0.0.0', port=int(os.getenv('PORT', '8000')))"]
