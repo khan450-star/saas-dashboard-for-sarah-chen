@@ -19,17 +19,17 @@ class Settings(BaseSettings):
     anthropic_api_key: str = Field(default="MOCK_KEY")
     openai_api_key: str = Field(default="")
     gemini_api_key: str = Field(default="")
-    llm_model: str = Field(default="claude-3-5-sonnet-latest")
+    llm_model: str = Field(default="claude-3-5-sonnet")
 
     # Per-agent model overrides (2026 specialist assignment)
     # Architect (analyst): Claude Opus — best at system design & PRD reasoning
-    architect_model: str = Field(default="anthropic/claude-opus-4-5")
-    # Lead Dev (builder): GPT-5.2-Codex — best at code generation + IDE writes
-    lead_dev_model: str = Field(default="anthropic/claude-3-5-sonnet-latest")
-    # Security Auditor: GPT-5.2 high-reasoning — strict OWASP analysis
-    security_model: str = Field(default="anthropic/claude-3-5-sonnet-latest")
-    # QA Tester (auditor): Gemini 3 Pro — best at browser/Playwright test plans
-    qa_model: str = Field(default="anthropic/claude-3-5-sonnet-latest")
+    architect_model: str = Field(default="claude-opus-4")
+    # Lead Dev (builder): Claude 3.5 Sonnet — best at code generation
+    lead_dev_model: str = Field(default="claude-3-5-sonnet")
+    # Security Auditor: Claude Opus — strict OWASP analysis
+    security_model: str = Field(default="claude-3-5-sonnet")
+    # QA Tester (auditor): Claude 3.5 Sonnet — best at browser/Playwright test plans
+    qa_model: str = Field(default="claude-3-5-sonnet")
 
     # Scout
     apify_api_token: str = Field(default="")
