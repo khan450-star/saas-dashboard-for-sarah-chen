@@ -38,6 +38,7 @@ try:
     from crewai.llms.providers.anthropic.completion import AnthropicCompletion
 
     _orig_convert_tools = AnthropicCompletion._convert_tools_for_interference
+    _orig_prepare_params = AnthropicCompletion._prepare_completion_params
 
     def _strip_strict_flags(obj):
         if isinstance(obj, dict):
@@ -53,7 +54,19 @@ try:
         _strip_strict_flags(converted)
         return converted
 
+    def _patched_prepare_completion_params(self, messages, system_message=None, tools=None, available_functions=None):
+        params = _orig_prepare_params(
+            self,
+            messages,
+            system_message=system_message,
+            tools=tools,
+            available_functions=available_functions,
+        )
+        _strip_strict_flags(params)
+        return params
+
     AnthropicCompletion._convert_tools_for_interference = _patched_convert_tools_for_interference
+    AnthropicCompletion._prepare_completion_params = _patched_prepare_completion_params
 except Exception:
     pass
 
