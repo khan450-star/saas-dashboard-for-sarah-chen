@@ -166,10 +166,20 @@ class ScraperTool(BaseTool):
     # ── Main live dispatcher ─────────────────────────────────────────
     def _live_scrape(self, source: str) -> str:
         """Route to the best actor per source."""
-        if source == "upwork":
-            leads = self._scrape_upwork()
-        else:
-            leads = self._scrape_google(source)
+        token = (settings.apify_api_token or "").strip()
+        if not token:
+            return json.dumps(self._sample_lead_fallback(), indent=2)
+
+        try:
+            if source == "upwork":
+                leads = self._scrape_upwork()
+            else:
+                leads = self._scrape_google(source)
+        except Exception as e:
+            # Do not fail the whole pipeline when scraper providers are unavailable
+            # or out of credit; use a local fallback lead so downstream phases run.
+            print(f"  [Scraper fallback] {e}")
+            leads = self._sample_lead_fallback()
 
         # Live sources can return empty or non-budget leads; keep pipeline moving.
         if not any((lead.get("budget_usd") or 0) > 0 for lead in leads):
