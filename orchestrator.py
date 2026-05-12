@@ -117,11 +117,6 @@ def _get_llm(model_override: str | None = None):
 
     model = model_override or f"anthropic/{settings.llm_model}"
 
-    # Claude Sonnet 4 (20250514) can fail with strict-tools requests in CrewAI.
-    # Use a safer default when that exact model is selected.
-    if model == "anthropic/claude-sonnet-4-20250514":
-        model = "anthropic/claude-3-5-sonnet-20241022"
-    
     # Ensure all models have the provider prefix
     if model and not any(model.startswith(p + "/") for p in ["anthropic", "openai", "gemini"]):
         model = f"anthropic/{model}"
