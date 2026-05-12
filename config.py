@@ -23,13 +23,13 @@ class Settings(BaseSettings):
 
     # Per-agent model overrides (2026 specialist assignment)
     # Architect (analyst): Claude Opus — best at system design & PRD reasoning
-    architect_model: str = Field(default="claude-opus-4-20250514")
+    architect_model: str = Field(default="anthropic/claude-opus-4-20250514")
     # Lead Dev (builder): Claude 3.5 Sonnet — best at code generation
-    lead_dev_model: str = Field(default="claude-3-5-sonnet-20241022")
+    lead_dev_model: str = Field(default="anthropic/claude-3-5-sonnet-20241022")
     # Security Auditor: Claude Opus — strict OWASP analysis
-    security_model: str = Field(default="claude-3-5-sonnet-20241022")
+    security_model: str = Field(default="anthropic/claude-3-5-sonnet-20241022")
     # QA Tester (auditor): Claude 3.5 Sonnet — best at browser/Playwright test plans
-    qa_model: str = Field(default="claude-3-5-sonnet-20241022")
+    qa_model: str = Field(default="anthropic/claude-3-5-sonnet-20241022")
 
     # Scout
     apify_api_token: str = Field(default="")
